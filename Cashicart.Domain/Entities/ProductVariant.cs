@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Cashicart.Domain.Exceptions;
+using System.ComponentModel.DataAnnotations;
 
 namespace Cashicart.Domain.Entities
 {
@@ -31,6 +32,23 @@ namespace Cashicart.Domain.Entities
             Size = size;
             Color = color;
             CreatedAt = DateTime.UtcNow;
+        }
+
+        public void UpdateVariant(string sku, decimal price, int stockQuantity, string? size = null, string? color = null)
+        {
+            if (string.IsNullOrWhiteSpace(sku))
+                throw new DomainException("Variant SKU is required.");
+            if (price <= 0)
+                throw new DomainException("Variant price must be greater than zero.");
+            if (stockQuantity < 0)
+                throw new DomainException("Variant stock cannot be negative.");
+
+            SKU = sku;
+            Price = price;
+            StockQuantity = stockQuantity;
+            Size = size;
+            Color = color;
+            UpdatedAt = DateTime.UtcNow;
         }
 
         public void UpdateStock(int quantity)

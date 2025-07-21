@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Cashicart.Application.Features.Inventory.Commands;
 using Cashicart.Application.Features.Inventory.Queries;
+using Cashicart.Common.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,60 +16,33 @@ namespace Cashicart.API.Controllers;
 public class InventoryController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly ILogger<InventoryController> _logger;
 
-    public InventoryController(IMediator mediator, ILogger<InventoryController> logger)
+    public InventoryController(IMediator mediator)
     {
         _mediator = mediator;
-        _logger = logger;
     }
 
     [HttpPost("adjust")]
     public async Task<IActionResult> AdjustInventory([FromBody] AdjustInventoryCommand command)
     {
-        try
-        {
-            var adjustmentId = await _mediator.Send(command);
-            _logger.LogInformation("Inventory adjustment created with ID {InventoryAdjustmentId}", adjustmentId);
-            return CreatedAtAction(nameof(GetAdjustment), new { id = adjustmentId }, new { InventoryAdjustmentId = adjustmentId });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adjusting inventory");
-            return StatusCode(500, "An error occurred while adjusting inventory.");
-        }
+        await _mediator.Send(command);
+        return Ok(ApiResponse<string>.SuccessResponse(null, "Inventory adjusted successfully."));
     }
 
-    [HttpGet("adjustments/{id}")]
-    //[HttpGet("{id}")]
-    public async Task<IActionResult> GetAdjustment(Guid id)
+
+
+    [HttpGet("adjustment/{adjustmentId}")]
+    public async Task<IActionResult> GetAdjustment(Guid adjustmentId)
     {
-        try
-        {
-            var adjustment = await _mediator.Send(new GetInventoryAdjustmentQuery { InventoryAdjustmentId = id });
-            return Ok(adjustment);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching inventory adjustment with ID {InventoryAdjustmentId}", id);
-            return StatusCode(500, "An error occurred while fetching the inventory adjustment.");
-        }
+        var result = await _mediator.Send(new GetInventoryAdjustmentQuery { InventoryAdjustmentId = adjustmentId });
+        return Ok(ApiResponse<object>.SuccessResponse(result, "Inventory adjustment fetched."));
     }
-
 
     [HttpGet("adjustments")]
     public async Task<IActionResult> GetAllInventoryAdjustments()
     {
-        try
-        {
-            var adjustments = await _mediator.Send(new GetAllInventoryAdjustmentsQuery());
-            return Ok(adjustments);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching all inventory adjustments");
-            return StatusCode(500, "An error occurred while fetching inventory adjustments.");
-        }
+        var adjustments = await _mediator.Send(new GetAllInventoryAdjustmentsQuery());
+        return Ok(ApiResponse<object>.SuccessResponse(adjustments, "Successfully fetched Inventory adjustment."));
     }
 
 }

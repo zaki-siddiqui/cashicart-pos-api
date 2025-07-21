@@ -1,5 +1,7 @@
 ﻿using Asp.Versioning;
 using Cashicart.Application.Features.Transactions.Commands;
+using Cashicart.Application.Features.Transactions.Queries;
+using Cashicart.Common.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,27 +15,30 @@ namespace Cashicart.API.Controllers;
 public class TransactionsController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly ILogger<TransactionsController> _logger;
 
-    public TransactionsController(IMediator mediator, ILogger<TransactionsController> logger)
+    public TransactionsController(IMediator mediator)
     {
         _mediator = mediator;
-        _logger = logger;
     }
 
     [HttpPost("refund")]
     public async Task<IActionResult> RefundTransaction([FromBody] RefundTransactionCommand command)
     {
-        try
-        {
-            await _mediator.Send(command);
-            _logger.LogInformation("Transaction {TransactionId} refunded", command.TransactionId);
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error refunding transaction");
-            return StatusCode(500, "An error occurred while refunding the transaction.");
-        }
+        await _mediator.Send(command);
+        return Ok(ApiResponse<string>.SuccessResponse(null, "Transaction refunded successfully."));
     }
+
+    //[HttpGet("{id}")]
+    //public async Task<IActionResult> GetTransaction(Guid id)
+    //{
+    //    var result = await _mediator.Send(new GetTransactionQuery { TransactionId = id });
+    //    return Ok(ApiResponse<object>.SuccessResponse(result, "Transaction fetched successfully."));
+    //}
+
+    //[HttpPost("create")]
+    //public async Task<IActionResult> CreateTransaction([FromBody] CreateTransactionCommand command)
+    //{
+    //    var transactionId = await _mediator.Send(command);
+    //    return Ok(ApiResponse<Guid>.SuccessResponse(transactionId, "Transaction created successfully."));
+    //}
 }

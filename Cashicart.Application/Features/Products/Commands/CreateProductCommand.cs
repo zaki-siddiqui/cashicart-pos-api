@@ -3,6 +3,8 @@ using Cashicart.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using FluentValidation;
+using Cashicart.Domain.Exceptions;
+using Cashicart.Common.DTOs;
 
 namespace Cashicart.Application.Features.Products.Commands
 {
@@ -14,6 +16,8 @@ namespace Cashicart.Application.Features.Products.Commands
         public int StockQuantity { get; set; }
         public Guid CategoryId { get; set; }
         public string? Description { get; set; }
+        public List<ProductTranslationDto> Translations { get; set; } = new();
+        public List<ProductVariantDto> Variants { get; set; } = new();
     }
     public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, Guid>
     {
@@ -28,12 +32,15 @@ namespace Cashicart.Application.Features.Products.Commands
 
         public async Task<Guid> Handle(CreateProductCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Creating product: {Name}", request.Name);
+            _logger.LogInformation("Starting CreateProduct for SKU: {SKU}", request.SKU);
 
             var category = await _unitOfWork.GetRepository<Category>().GetByIdAsync(request.CategoryId);
             if (category == null || category.IsDeleted)
-                throw new Exception($"Category '{request.CategoryId}' does not exist or has been deleted.");
-            //throw new Exception("Invalid or deleted category.");
+            {
+                _logger.LogWarning("Invalid category ID {CategoryId} for product creation", request.CategoryId);
+                throw new DomainException("Invalid or deleted category.");
+            }
+
 
             var product = new Product(
                 request.Name,
@@ -44,12 +51,31 @@ namespace Cashicart.Application.Features.Products.Commands
                 request.Description
             );
 
+            // Add translations
+            foreach (var t in request.Translations)
+            {
+                _logger.LogInformation("Adding translation for lang: {Lang}, name: {Name}", t.Language, t.Name);
+                product.Translations.Add(new ProductTranslation(product.ProductId, t.Language, t.Name, t.Description));
+            }
+
+            // Add variants
+            foreach (var v in request.Variants)
+            {
+                if (string.IsNullOrWhiteSpace(v.SKU)) throw new DomainException("Variant SKU is required.");
+                if (v.Price <= 0) throw new DomainException("Variant price must be greater than zero.");
+                if (v.StockQuantity < 0) throw new DomainException("Variant stock cannot be negative.");
+
+                product.Variants.Add(new ProductVariant(product.ProductId, v.SKU, v.Price, v.StockQuantity, v.Size, v.Color));
+            }
+
             await _unitOfWork.GetRepository<Product>().AddAsync(product);
 
             var auditLog = new AuditLog(Guid.Empty, "CreateProduct", nameof(Product), product.ProductId);
             await _unitOfWork.GetRepository<AuditLog>().AddAsync(auditLog);
 
             await _unitOfWork.CommitAsync();
+
+            _logger.LogInformation("Product created successfully with ID: {ProductId}", product.ProductId);
 
             return product.ProductId;
         }

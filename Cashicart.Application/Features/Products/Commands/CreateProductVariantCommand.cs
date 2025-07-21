@@ -35,21 +35,23 @@ namespace Cashicart.Application.Features.Products.Commands
 
         public async Task<Guid> Handle(CreateProductVariantCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Creating variant for product {ProductId}", request.ProductId);
-
-            //var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(request.ProductId);
-            //if (product == null)
-            //    throw new Exception("Product not found");
+            _logger.LogInformation("Creating variant with SKU {SKU} for product {ProductId}", request.SKU, request.ProductId);
 
             var product = await _unitOfWork.GetRepository<Product>().GetAll()
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.ProductId == request.ProductId && !p.IsDeleted, cancellationToken);
 
             if (product == null)
+            {
+                _logger.LogWarning("Product not found or deleted: {ProductId}", request.ProductId);
                 throw new DomainException("Product not found or deleted.");
+            }
 
             if (product.Category == null || product.Category.IsDeleted)
+            {
+                _logger.LogWarning("Invalid or deleted category for Product ID {ProductId}", request.ProductId);
                 throw new DomainException("Associated category is missing or deleted.");
+            }
 
             // Validation
             if (string.IsNullOrWhiteSpace(request.SKU))
@@ -65,7 +67,10 @@ namespace Cashicart.Application.Features.Products.Commands
             var existing = await _unitOfWork.GetRepository<ProductVariant>().GetAll()
                 .AnyAsync(v => v.SKU == request.SKU, cancellationToken);
             if (existing)
+            {
+                _logger.LogWarning("Duplicate SKU '{SKU}' for product {ProductId}", request.SKU, request.ProductId);
                 throw new DomainException("SKU already exists for another variant.");
+            }
 
             var variant = new ProductVariant(
                 request.ProductId,
@@ -78,6 +83,8 @@ namespace Cashicart.Application.Features.Products.Commands
 
             await _unitOfWork.GetRepository<ProductVariant>().AddAsync(variant);
             await _unitOfWork.CommitAsync();
+
+            _logger.LogInformation("Variant created with SKU {SKU}", request.SKU);
 
             return variant.VariantId;
         }

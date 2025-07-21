@@ -38,12 +38,26 @@ namespace Cashicart.Application.Features.Products.Commands
         {
             _logger.LogInformation("Updating variant {VariantId} for product {ProductId}", request.VariantId, request.ProductId);
 
+            var product = await _unitOfWork.GetRepository<Product>()
+                .GetAll()
+                .Include(p => p.Variants)
+                .FirstOrDefaultAsync(p => p.ProductId == request.ProductId, cancellationToken);
+
+            if (product == null)
+            {
+                _logger.LogWarning("Product not found: {ProductId}", request.ProductId);
+                throw new DomainException("Product not found.");
+            }
+
             var variantRepo = _unitOfWork.GetRepository<ProductVariant>();
             var variant = await variantRepo.GetAll()
                 .FirstOrDefaultAsync(v => v.VariantId == request.VariantId && v.ProductId == request.ProductId, cancellationToken);
 
             if (variant == null)
-                throw new Exception("Variant not found.");
+            {
+                _logger.LogWarning("Variant not found: {VariantId}", request.VariantId);
+                throw new DomainException("Variant not found.");
+            }
 
             // Validation
             if (string.IsNullOrWhiteSpace(request.SKU))
@@ -70,6 +84,8 @@ namespace Cashicart.Application.Features.Products.Commands
 
             await variantRepo.UpdateAsync(variant);
             await _unitOfWork.CommitAsync();
+
+            _logger.LogInformation("Variant {VariantId} updated successfully", request.VariantId);
         }
     }
 }

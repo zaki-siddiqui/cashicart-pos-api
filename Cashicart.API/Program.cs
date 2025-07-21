@@ -18,6 +18,9 @@ using Microsoft.AspNetCore.Diagnostics;
 using Asp.Versioning; // Added
 using Asp.Versioning.ApiExplorer;
 using Cashicart.Common.Options;
+using Cashicart.API.Middleware;
+using Cashicart.Application.Common.Options;
+using Cashicart.Application.Features.Products.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -133,6 +136,14 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.Configure<ImageUploadOptions>(builder.Configuration.GetSection("ImageUpload"));
 
+//builder.Services.Configure<SupportedLanguageOptions>(
+//    builder.Configuration.GetSection("SupportedLanguages"));
+
+builder.Services.Configure<LocalizationOptions>(
+    builder.Configuration.GetSection("Localization"));
+
+builder.Services.AddValidatorsFromAssembly(typeof(CreateProductCommandValidator).Assembly);
+
 
 var app = builder.Build();
 
@@ -166,6 +177,7 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
+app.UseMiddleware<ApiExceptionMiddleware>();
 
 app.UseStaticFiles();
 

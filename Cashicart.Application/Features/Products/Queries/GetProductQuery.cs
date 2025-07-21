@@ -10,6 +10,7 @@ namespace Cashicart.Application.Features.Products.Queries
     public class GetProductQuery : IRequest<ProductDto>
     {
         public Guid ProductId { get; set; }
+        public string? Language { get; set; } = "en";
     }
 
     public class GetProductQueryHandler : IRequestHandler<GetProductQuery, ProductDto>
@@ -31,19 +32,36 @@ namespace Cashicart.Application.Features.Products.Queries
                 .Include(p => p.Category)
                 .Include(p => p.Images)
                 .Include(p => p.Variants)
+                .Include(p => p.Translations)
                 .FirstOrDefaultAsync(p => p.ProductId == request.ProductId && !p.IsDeleted, cancellationToken);
 
             if (product == null)
-                throw new Exception("Product not found");
+            {
+                _logger.LogWarning("Product not found: {ProductId}", request.ProductId);
+                throw new Exception("Product not found.");
+            }
+
+
+            // Determine requested language
+            string lang = string.IsNullOrWhiteSpace(request.Language) ? "en" : request.Language.ToLower();
+            var translation = product.Translations.FirstOrDefault(t => t.Language == lang)
+                           ?? product.Translations.FirstOrDefault(t => t.Language == "en"); // fallback
+
+            if (translation == null)
+            {
+                _logger.LogWarning("No translation found for ProductId {ProductId} in lang {Lang}", request.ProductId, lang);
+            }
 
             return new ProductDto
             {
                 ProductId = product.ProductId,
-                Name = product.Name,
+                //Name = product.Name,
+                Name = translation?.Name ?? product.Name,
                 SKU = product.SKU,
                 Price = product.Price,
                 StockQuantity = product.StockQuantity,
-                Description = product.Description,
+                //Description = product.Description,
+                Description = translation?.Description ?? product.Description,
                 CategoryId = product.CategoryId,
                 CategoryName = product.Category?.Name,
                 ImageUrls = product.Images?.OrderByDescending(i => i.IsPrimary).Select(i => i.ImageUrl).ToList() ?? new(),

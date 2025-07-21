@@ -40,6 +40,8 @@ namespace Cashicart.Application.Features.Products.Commands
 
         public async Task<List<string>> Handle(UploadProductImagesCommand request, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Uploading images for product {ProductId}", request.ProductId);
+
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
             var uploadsPath = Path.Combine(_env.WebRootPath ?? "wwwroot", "uploads", "products");
 
@@ -72,12 +74,14 @@ namespace Cashicart.Application.Features.Products.Commands
 
                 if (!allowedExtensions.Contains(ext))
                 {
+                    _logger.LogWarning("File type {Ext} not allowed", ext);
                     invalidFiles.Add($"'{file.FileName}' has unsupported extension '{ext}'");
                     continue;
                 }
 
                 if (file.Length > _imageOptions.MaxImageSizeBytes)
                 {
+                    _logger.LogWarning("File {FileName} exceeds max size", file.FileName);
                     invalidFiles.Add($"'{file.FileName}' exceeds {_imageOptions.MaxImageSizeBytes / 1024 / 1024}MB size limit");
                 }
             }
@@ -99,6 +103,8 @@ namespace Cashicart.Application.Features.Products.Commands
 
             foreach (var file in request.Files)
             {
+                _logger.LogInformation("Image uploaded: {FileName} ({FileSize} KB)", file.FileName, file.Length / 1024);
+
                 var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
                 var fileName = $"{Guid.NewGuid()}{ext}";
                 var filePath = Path.Combine(uploadsPath, fileName);
@@ -133,6 +139,7 @@ namespace Cashicart.Application.Features.Products.Commands
             }
 
             await _unitOfWork.CommitAsync();
+            _logger.LogInformation("{Count} image(s) uploaded for product {ProductId}", request.Files.Count, request.ProductId);
             return uploadedUrls;
         }
     }

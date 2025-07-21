@@ -24,6 +24,7 @@ namespace Cashicart.Domain.Entities
         public virtual Category Category { get; private set; }
         public virtual ICollection<ProductImage> Images { get; private set; } = new List<ProductImage>();
         public virtual ICollection<ProductVariant> Variants { get; private set; } = new List<ProductVariant>();
+        public virtual ICollection<ProductTranslation> Translations { get; private set; } = new List<ProductTranslation>();
 
 
 

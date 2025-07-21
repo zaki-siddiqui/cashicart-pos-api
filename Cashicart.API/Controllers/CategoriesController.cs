@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Cashicart.Application.Features.Categories.Commands;
 using Cashicart.Application.Features.Categories.Queries;
+using Cashicart.Common.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,19 +15,17 @@ namespace Cashicart.API.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly ILogger<CategoriesController> _logger;
 
-        public CategoriesController(IMediator mediator, ILogger<CategoriesController> logger)
+        public CategoriesController(IMediator mediator)
         {
             _mediator = mediator;
-            _logger = logger;
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCategoryCommand command)
         {
             var id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetAll), new { id }, new { CategoryId = id });
+            return CreatedAtAction(nameof(GetAll), new { id }, ApiResponse<Guid>.SuccessResponse(id, "Category created successfully."));
         }
 
         [HttpPut("{id}")]
@@ -34,21 +33,21 @@ namespace Cashicart.API.Controllers
         {
             command.CategoryId = id;
             await _mediator.Send(command);
-            return NoContent();
+            return Ok(ApiResponse<string>.SuccessResponse(null, "Category updated successfully."));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             await _mediator.Send(new DeleteCategoryCommand { CategoryId = id });
-            return NoContent();
+            return Ok(ApiResponse<string>.SuccessResponse(null, "Category deleted successfully."));
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var result = await _mediator.Send(new GetAllCategoriesQuery());
-            return Ok(result);
+            return Ok(ApiResponse<object>.SuccessResponse(result, "Categories fetched successfully."));
         }
     }
 }

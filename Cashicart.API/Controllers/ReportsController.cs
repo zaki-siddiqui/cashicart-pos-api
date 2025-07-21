@@ -1,8 +1,10 @@
 ﻿using Asp.Versioning;
 using Cashicart.Application.Features.Reports.Queries;
+using Cashicart.Common.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Cashicart.API.Controllers;
 
@@ -13,26 +15,16 @@ namespace Cashicart.API.Controllers;
 public class ReportsController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly ILogger<ReportsController> _logger;
 
-    public ReportsController(IMediator mediator, ILogger<ReportsController> logger)
+    public ReportsController(IMediator mediator)
     {
         _mediator = mediator;
-        _logger = logger;
     }
 
     [HttpGet("sales")]
     public async Task<IActionResult> GetSalesReport([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
     {
-        try
-        {
-            var report = await _mediator.Send(new GetSalesReportQuery { StartDate = startDate, EndDate = endDate });
-            return Ok(report);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error generating sales report");
-            return StatusCode(500, "An error occurred while generating the report.");
-        }
+        var result = await _mediator.Send(new GetSalesReportQuery { StartDate = startDate, EndDate = endDate });
+        return Ok(ApiResponse<object>.SuccessResponse(result, "Sales report generated."));
     }
 }

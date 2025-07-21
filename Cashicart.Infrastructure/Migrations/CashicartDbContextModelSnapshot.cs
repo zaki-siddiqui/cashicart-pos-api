@@ -281,6 +281,35 @@ namespace Cashicart.Infrastructure.Migrations
                     b.ToTable("ProductImages");
                 });
 
+            modelBuilder.Entity("Cashicart.Domain.Entities.ProductTranslation", b =>
+                {
+                    b.Property<Guid>("TranslationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("nvarchar(5)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("TranslationId");
+
+                    b.HasIndex("ProductId", "Language")
+                        .IsUnique();
+
+                    b.ToTable("ProductTranslations");
+                });
+
             modelBuilder.Entity("Cashicart.Domain.Entities.ProductVariant", b =>
                 {
                     b.Property<Guid>("VariantId")
@@ -407,6 +436,17 @@ namespace Cashicart.Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Cashicart.Domain.Entities.ProductTranslation", b =>
+                {
+                    b.HasOne("Cashicart.Domain.Entities.Product", "Product")
+                        .WithMany("Translations")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Cashicart.Domain.Entities.ProductVariant", b =>
                 {
                     b.HasOne("Cashicart.Domain.Entities.Product", "Product")
@@ -435,6 +475,8 @@ namespace Cashicart.Infrastructure.Migrations
             modelBuilder.Entity("Cashicart.Domain.Entities.Product", b =>
                 {
                     b.Navigation("Images");
+
+                    b.Navigation("Translations");
 
                     b.Navigation("Variants");
                 });

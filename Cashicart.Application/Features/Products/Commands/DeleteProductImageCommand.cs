@@ -42,9 +42,11 @@
 
 using Cashicart.Common.Interfaces;
 using Cashicart.Domain.Entities;
+using Cashicart.Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Cashicart.Application.Features.Products.Commands
 {
@@ -58,27 +60,38 @@ namespace Cashicart.Application.Features.Products.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _env;
+        private readonly ILogger<DeleteProductImageCommandHandler> _logger;
 
-        public DeleteProductImageCommandHandler(IUnitOfWork unitOfWork, IWebHostEnvironment env)
+        public DeleteProductImageCommandHandler(IUnitOfWork unitOfWork, IWebHostEnvironment env, ILogger<DeleteProductImageCommandHandler> logger)
         {
             _unitOfWork = unitOfWork;
             _env = env;
+            _logger = logger;
         }
 
         public async Task Handle(DeleteProductImageCommand request, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Deleting image {ImageId} from product {ProductId}", request.ImageId, request.ProductId);
+
             var repo = _unitOfWork.GetRepository<ProductImage>();
 
             var image = await repo.GetByIdAsync(request.ImageId);
             if (image == null || image.ProductId != request.ProductId)
-                throw new Exception("Image not found or does not belong to the product.");
+            {
+                _logger.LogWarning("Image not found with image {imageId}", request.ImageId);
+                throw new DomainException("Image not found or does not belong to the product.");
+            }
+                
 
             // Prevent deleting last image
             var totalImages = await repo.GetAll()
                 .CountAsync(i => i.ProductId == request.ProductId, cancellationToken);
 
             if (totalImages <= 1)
-                throw new Exception("At least one image is required per product. You cannot delete the last image.");
+            {
+                _logger.LogWarning("Cannot delete the only image for product {ProductId}", request.ProductId);
+                throw new DomainException("At least one image is required per product. You cannot delete the last image.");
+            }
 
             bool isPrimary = image.IsPrimary;
 
@@ -97,6 +110,8 @@ namespace Cashicart.Application.Features.Products.Commands
 
             await repo.Remove(image);
             await _unitOfWork.CommitAsync();
+
+            _logger.LogInformation("Image {ImageId} deleted successfully");
 
             // Auto-promote another image if deleted one was primary
             if (isPrimary)

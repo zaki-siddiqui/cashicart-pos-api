@@ -22,6 +22,8 @@ namespace Cashicart.Application.Features.Products.Queries
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
 
+        public string? Language { get; set; } = "en";
+
         public string? SortBy { get; set; } // e.g. "price", "name", "stock"
         public string? SortOrder { get; set; } = "asc"; // "asc" or "desc"
     }
@@ -40,13 +42,18 @@ namespace Cashicart.Application.Features.Products.Queries
 
         public async Task<List<ProductDto>> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Fetching products with filters");
+            _logger.LogInformation("Fetching products with filters: Name={Name}, Category={Category}, Price={Min}-{Max}, Lang={Lang}",
+               request.NameFilter, request.CategoryId, request.MinPrice, request.MaxPrice, request.Language);
+
+            string lang = string.IsNullOrWhiteSpace(request.Language) ? "en" : request.Language.ToLower();
+
 
             var query = _unitOfWork.GetRepository<Product>()
                 .GetAll()
                 .Include(p => p.Category)
                 .Include(p => p.Images)
                 .Include(p => p.Variants)
+                .Include(p => p.Translations)
                 .Where(p => !p.IsDeleted)
                 .AsQueryable();
 
@@ -84,41 +91,83 @@ namespace Cashicart.Application.Features.Products.Queries
                 .Take(request.PageSize)
                 .ToListAsync(cancellationToken);
 
-            return products.Select(p => new ProductDto
+            var result = products.Select(p =>
             {
-                ProductId = p.ProductId,
-                Name = p.Name,
-                SKU = p.SKU,
-                Price = p.Price,
-                StockQuantity = p.StockQuantity,
-                Description = p.Description,
-                CategoryId = p.CategoryId,
-                CategoryName = p.Category?.Name,
-                ImageUrls = p.Images?
-                    .OrderByDescending(i => i.IsPrimary)
-                    .Select(i => i.ImageUrl)
-                    .ToList() ?? new List<string>(),
+                var translation = p.Translations.FirstOrDefault(t => t.Language == lang)
+                               ?? p.Translations.FirstOrDefault(t => t.Language == "en");
 
-                ThumbnailUrls = p.Images?
-                    .OrderByDescending(i => i.IsPrimary)
-                    .Select(i => i.ThumbnailUrl)
-                    .ToList() ?? new List<string>(),
-                Variants = p.Variants?.Select(v => new ProductVariantDto
+                return new ProductDto
                 {
-                    VariantId = v.VariantId,
-                    SKU = v.SKU,
-                    Size = v.Size,
-                    Color = v.Color,
-                    Price = v.Price,
-                    StockQuantity = v.StockQuantity
-                }).ToList() ?? new()
+                    ProductId = p.ProductId,
+                    Name = translation?.Name ?? p.Name,
+                    SKU = p.SKU,
+                    Price = p.Price,
+                    StockQuantity = p.StockQuantity,
+                    Description = translation?.Description ?? p.Description,
+                    CategoryId = p.CategoryId,
+                    CategoryName = p.Category?.Name,
+                    ImageUrls = p.Images?
+                        .OrderByDescending(i => i.IsPrimary)
+                        .Select(i => i.ImageUrl)
+                        .ToList() ?? new List<string>(),
 
-                //ImageUrls = p.Images?
-                //    .OrderByDescending(i => i.IsPrimary)
-                //    .Select(i => i.ImageUrl)
-                //    .ToList() ?? new List<string>()
+                    ThumbnailUrls = p.Images?
+                        .OrderByDescending(i => i.IsPrimary)
+                        .Select(i => i.ThumbnailUrl)
+                        .ToList() ?? new List<string>(),
+
+                    Variants = p.Variants?.Select(v => new ProductVariantDto
+                    {
+                        VariantId = v.VariantId,
+                        SKU = v.SKU,
+                        Size = v.Size,
+                        Color = v.Color,
+                        Price = v.Price,
+                        StockQuantity = v.StockQuantity
+                    }).ToList() ?? new()
+                };
             }).ToList();
+
+            _logger.LogInformation("{Count} products returned for Lang={Lang}", result.Count, lang);
+            return result;
+
+            //return products.Select(p => new ProductDto
+            //{
+            //    ProductId = p.ProductId,
+            //    Name = p.Name,
+            //    SKU = p.SKU,
+            //    Price = p.Price,
+            //    StockQuantity = p.StockQuantity,
+            //    Description = p.Description,
+            //    CategoryId = p.CategoryId,
+            //    CategoryName = p.Category?.Name,
+            //    ImageUrls = p.Images?
+            //    .OrderByDescending(i => i.IsPrimary)
+            //    .Select(i => i.ImageUrl)
+            //    .ToList() ?? new List<string>(),
+
+            //    ThumbnailUrls = p.Images?
+            //    .OrderByDescending(i => i.IsPrimary)
+            //    .Select(i => i.ThumbnailUrl)
+            //    .ToList() ?? new List<string>(),
+            //    Variants = p.Variants?.Select(v => new ProductVariantDto
+            //    {
+            //        VariantId = v.VariantId,
+            //        SKU = v.SKU,
+            //        Size = v.Size,
+            //        Color = v.Color,
+            //        Price = v.Price,
+            //        StockQuantity = v.StockQuantity
+            //    }).ToList() ?? new()
+
+            //    //ImageUrls = p.Images?
+            //    //    .OrderByDescending(i => i.IsPrimary)
+            //    //    .Select(i => i.ImageUrl)
+            //    //    .ToList() ?? new List<string>()
+            //}).ToList();
+
         }
+            
 
         //public async Task<List<ProductDto>> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
         //{
