@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace Cashicart.Common.DTOs
 {
@@ -20,7 +16,6 @@ namespace Cashicart.Common.DTOs
         public string? Description { get; set; }
         public List<string> ThumbnailUrls { get; set; } = new();
         public List<ProductVariantDto> Variants { get; set; } = new();
-
 
     }
 }

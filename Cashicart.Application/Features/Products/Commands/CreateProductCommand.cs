@@ -2,7 +2,6 @@
 using Cashicart.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using FluentValidation;
 using Cashicart.Domain.Exceptions;
 using Cashicart.Common.DTOs;
 
@@ -79,23 +78,5 @@ namespace Cashicart.Application.Features.Products.Commands
 
             return product.ProductId;
         }
-
-        //public async Task<Guid> Handle(CreateProductCommand request, CancellationToken cancellationToken)
-        //{
-        //    try
-        //    {
-        //        var product = new Product(request.Name, request.SKU, request.Price, request.StockQuantity, request.CategoryId);
-        //        var repository = _unitOfWork.GetRepository<Product>();
-        //        await repository.AddAsync(product);
-        //        await _unitOfWork.CommitAsync();
-        //        _logger.LogInformation("Product created with ID {ProductId}", product.ProductId);
-        //        return product.ProductId;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Failed to create product with command {@Command}", request);
-        //        throw; // Re-throw to trigger the 500 in the controller
-        //    }
-        //}
     }
 }

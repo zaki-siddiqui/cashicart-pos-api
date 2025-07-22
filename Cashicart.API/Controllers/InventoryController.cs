@@ -3,7 +3,6 @@ using Cashicart.Application.Features.Inventory.Commands;
 using Cashicart.Application.Features.Inventory.Queries;
 using Cashicart.Common.Responses;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cashicart.API.Controllers;

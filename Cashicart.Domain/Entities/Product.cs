@@ -1,10 +1,6 @@
 ﻿using Cashicart.Domain.Exceptions;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Cashicart.Domain.Entities
 {
@@ -32,23 +28,6 @@ namespace Cashicart.Domain.Entities
         {
             // Parameterless constructor for EF Core
         }
-
-        //public Product(string name, string sku, decimal price, int stockQuantity, Guid categoryId)
-        //{
-        //    if (string.IsNullOrWhiteSpace(name)) throw new DomainException("Product name is required.");
-        //    if (string.IsNullOrWhiteSpace(sku)) throw new DomainException("SKU is required.");
-        //    //if (price <= 0) throw new DomainException("Price must be greater than zero.");
-        //    if (price < 0) throw new DomainException("Price cannot be negative.");
-        //    if (stockQuantity < 0) throw new DomainException("Stock quantity cannot be negative.");
-        //    ProductId = Guid.NewGuid();
-        //    Name = name;
-        //    SKU = sku;
-        //    Price = price;
-        //    StockQuantity = stockQuantity;
-        //    CategoryId = categoryId;
-        //    CreatedAt = DateTime.UtcNow;
-        //    UpdatedAt = DateTime.UtcNow;
-        //}
 
         public Product(string name, string sku, decimal price, int stockQuantity, Guid categoryId, string? description = null)
         {

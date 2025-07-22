@@ -2,10 +2,7 @@
 using Cashicart.Application.Features.Products.Commands;
 using Cashicart.Application.Features.Products.Queries;
 using Cashicart.Common.Responses;
-using Cashicart.Domain.Entities;
-using Cashicart.Domain.Exceptions;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace Cashicart.API.Controllers;
 

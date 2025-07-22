@@ -1,6 +1,5 @@
 ﻿using Cashicart.Common.DTOs;
 using Cashicart.Common.Interfaces;
-using Cashicart.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

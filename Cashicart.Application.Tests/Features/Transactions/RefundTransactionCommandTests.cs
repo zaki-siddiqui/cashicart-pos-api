@@ -1,15 +1,10 @@
 ﻿using Cashicart.Application.Features.Transactions.Commands;
 using Cashicart.Common.Interfaces;
 using Cashicart.Domain.Entities;
-using Cashicart.Domain.Exceptions;
 using Cashicart.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Cashicart.Application.Tests.Features.Transactions
 {

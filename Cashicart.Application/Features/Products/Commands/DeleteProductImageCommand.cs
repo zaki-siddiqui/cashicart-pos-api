@@ -1,46 +1,4 @@
-﻿//using Cashicart.Common.Interfaces;
-//using Cashicart.Domain.Entities;
-//using MediatR;
-//using Microsoft.AspNetCore.Hosting;
-
-//namespace Cashicart.Application.Features.Products.Commands
-//{
-//    public class DeleteProductImageCommand : IRequest
-//    {
-//        public Guid ProductId { get; set; }
-//        public Guid ImageId { get; set; }
-//    }
-
-//    public class DeleteProductImageCommandHandler : IRequestHandler<DeleteProductImageCommand>
-//    {
-//        private readonly IUnitOfWork _unitOfWork;
-//        private readonly IWebHostEnvironment _env;
-
-//        public DeleteProductImageCommandHandler(IUnitOfWork unitOfWork, IWebHostEnvironment env)
-//        {
-//            _unitOfWork = unitOfWork;
-//            _env = env;
-//        }
-
-//        public async Task Handle(DeleteProductImageCommand request, CancellationToken cancellationToken)
-//        {
-//            var repo = _unitOfWork.GetRepository<ProductImage>();
-//            var image = await repo.GetByIdAsync(request.ImageId);
-//            if (image == null || image.ProductId != request.ProductId)
-//                throw new Exception("Image not found or does not belong to product.");
-
-//            // Delete file from disk
-//            var fullPath = Path.Combine(_env.WebRootPath, image.ImageUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
-//            if (File.Exists(fullPath))
-//                File.Delete(fullPath);
-
-//            await repo.Remove(image);
-//            await _unitOfWork.CommitAsync();
-//        }
-//    }
-//}
-
-using Cashicart.Common.Interfaces;
+﻿using Cashicart.Common.Interfaces;
 using Cashicart.Domain.Entities;
 using Cashicart.Domain.Exceptions;
 using MediatR;

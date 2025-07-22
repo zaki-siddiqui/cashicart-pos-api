@@ -1,14 +1,9 @@
 ﻿using Cashicart.Application.Features.Products.Queries;
-using Cashicart.Common.Exceptions;
 using Cashicart.Common.Interfaces;
 using Cashicart.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Cashicart.Application.Tests.Features.Products
 {

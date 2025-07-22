@@ -9,12 +9,6 @@ public class PaymentService : IPaymentService
     private readonly ILogger<PaymentService> _logger;
     private readonly string _stripeApiKey;
 
-    //public PaymentService(ILogger<PaymentService> logger)
-    //{
-    //    _logger = logger;
-    //    StripeConfiguration.ApiKey = "sk_test_..."; // Configure via appsettings.json
-    //}
-
     public PaymentService(ILogger<PaymentService> logger, IConfiguration configuration)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));

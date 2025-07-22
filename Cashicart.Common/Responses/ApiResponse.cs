@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Cashicart.Common.Responses
 {
     public class ApiResponse<T>
@@ -22,9 +17,5 @@ namespace Cashicart.Common.Responses
         {
             return new ApiResponse<T> { Success = false, Message = message, Errors = errors, Data = default };
         }
-        //public static ApiResponse<T> FailureResponse(string message)
-        //{
-        //    return new ApiResponse<T> { Success = false, Message = message, Data = default };
-        //}
     }
 }

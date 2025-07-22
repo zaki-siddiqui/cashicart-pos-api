@@ -1,10 +1,6 @@
 ﻿using Cashicart.Domain.Exceptions;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Cashicart.Domain.Entities
 {
@@ -29,14 +25,7 @@ namespace Cashicart.Domain.Entities
 
         public ProductTranslation() { }
 
-        //public ProductTranslation(Guid productId, string language, string name, string? description)
-        //{
-        //    ProductId = productId;
-        //    Language = language.ToLowerInvariant();
-        //    Name = name;
-        //    Description = description;
-        //}
-
+        
         public ProductTranslation(Guid productId, string language, string name, string? description)
         {
             if (string.IsNullOrWhiteSpace(language)) throw new DomainException("Language is required.");

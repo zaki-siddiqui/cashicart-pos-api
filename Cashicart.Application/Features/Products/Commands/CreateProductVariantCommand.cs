@@ -4,11 +4,7 @@ using Cashicart.Domain.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Cashicart.Application.Features.Products.Commands
 {
@@ -88,28 +84,5 @@ namespace Cashicart.Application.Features.Products.Commands
 
             return variant.VariantId;
         }
-
-
-        //public async Task<Guid> Handle(CreateProductVariantCommand request, CancellationToken cancellationToken)
-        //{
-        //    _logger.LogInformation("Creating variant for product {ProductId}", request.ProductId);
-
-        //    var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(request.ProductId);
-        //    if (product == null) throw new Exception("Product not found");
-
-        //    var variant = new ProductVariant(
-        //        request.ProductId,
-        //        request.SKU,
-        //        request.Price,
-        //        request.StockQuantity,
-        //        request.Size,
-        //        request.Color
-        //    );
-
-        //    await _unitOfWork.GetRepository<ProductVariant>().AddAsync(variant);
-        //    await _unitOfWork.CommitAsync();
-
-        //    return variant.VariantId;
-        //}
     }
 }

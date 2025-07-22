@@ -6,9 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MediatR;
 using Serilog;
-using Microsoft.Extensions.Logging;
 using System.Text;
 using Cashicart.Application;
 using FluentValidation; // Added
@@ -16,10 +14,8 @@ using Cashicart.Application.Features.Products.Commands;
 using System.Reflection;
 using Microsoft.AspNetCore.Diagnostics;
 using Asp.Versioning; // Added
-using Asp.Versioning.ApiExplorer;
 using Cashicart.Common.Options;
 using Cashicart.API.Middleware;
-using Cashicart.Application.Common.Options;
 using Cashicart.Application.Features.Products.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
