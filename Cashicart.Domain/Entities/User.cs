@@ -13,16 +13,11 @@ namespace Cashicart.Domain.Entities
         public string LastName { get; private set; }
         public string? PhoneNumber { get; private set; }
         public UserRole Role { get; private set; }
-        public Guid? BusinessId { get; private set; } // For multi-tenancy
         public bool IsActive { get; private set; } = true;
-        public bool EmailConfirmed { get; private set; } = false;
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; private set; }
         public DateTime? LastLoginAt { get; private set; }
         public bool IsDeleted { get; private set; } = false;
-
-        // Navigation properties
-        public virtual Business? Business { get; private set; }
 
         public User()
         {
@@ -30,7 +25,7 @@ namespace Cashicart.Domain.Entities
         }
 
         public User(string email, string passwordHash, string firstName, string lastName, 
-                   UserRole role, Guid? businessId = null, string? phoneNumber = null)
+                   UserRole role, string? phoneNumber = null)
         {
             if (string.IsNullOrWhiteSpace(email) || !IsValidEmail(email))
                 throw new DomainException("Valid email address is required.");
@@ -46,7 +41,6 @@ namespace Cashicart.Domain.Entities
             FirstName = firstName;
             LastName = lastName;
             Role = role;
-            BusinessId = businessId;
             PhoneNumber = phoneNumber;
         }
 
@@ -72,11 +66,7 @@ namespace Cashicart.Domain.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public void ConfirmEmail()
-        {
-            EmailConfirmed = true;
-            UpdatedAt = DateTime.UtcNow;
-        }
+
 
         public void UpdateLastLogin()
         {
@@ -120,9 +110,8 @@ namespace Cashicart.Domain.Entities
 
     public enum UserRole
     {
-        SuperAdmin = 0,     // System administrator
-        BusinessOwner = 1,  // Business owner
-        Manager = 2,        // Store manager
+        Owner = 1,          // Business owner
+        Manager = 2,        // Store manager  
         Cashier = 3,        // Point of sale operator
         Employee = 4        // General employee
     }

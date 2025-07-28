@@ -15,7 +15,6 @@ namespace Cashicart.Domain.Entities
         public int StockQuantity { get; private set; }
         public int? LowStockThreshold { get; private set; } = 10; // Alert when stock is low
         public Guid CategoryId { get; private set; }
-        public Guid BusinessId { get; private set; } // Multi-tenancy support
         public bool IsTaxable { get; private set; } = true;
         public decimal TaxRate { get; private set; } = 0.0m; // Default tax rate for this product
         public string? Barcode { get; private set; } // For barcode scanning
@@ -27,7 +26,6 @@ namespace Cashicart.Domain.Entities
         
         // Navigation properties
         public virtual Category Category { get; private set; }
-        public virtual Business Business { get; private set; }
         public virtual ICollection<ProductImage> Images { get; private set; } = new List<ProductImage>();
         public virtual ICollection<ProductVariant> Variants { get; private set; } = new List<ProductVariant>();
         public virtual ICollection<ProductTranslation> Translations { get; private set; } = new List<ProductTranslation>();
@@ -40,7 +38,7 @@ namespace Cashicart.Domain.Entities
         }
 
         public Product(string name, string sku, decimal price, int stockQuantity, 
-                      Guid categoryId, Guid businessId, string? description = null, 
+                      Guid categoryId, string? description = null, 
                       decimal? costPrice = null, string? barcode = null, 
                       bool isTaxable = true, decimal taxRate = 0.0m, 
                       int? lowStockThreshold = 10)
@@ -60,7 +58,6 @@ namespace Cashicart.Domain.Entities
             StockQuantity = stockQuantity;
             LowStockThreshold = lowStockThreshold;
             CategoryId = categoryId;
-            BusinessId = businessId;
             Description = description;
             Barcode = barcode;
             IsTaxable = isTaxable;
